@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Biblia</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="src/css/styles.css">
+  <meta name="theme-color" content="#2c3e50">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>La Santa Biblia</h1>
+    <div class="selectors-container">
+      <select id="select-libro" aria-label="Seleccionar Libro">
+        </select>
+      <select id="select-capitulo" aria-label="Seleccionar Capítulo">
+        </select>
+    </div>
+  </header>
+
+  <main class="lectura-container">
+    <div id="visor-versiculos">
+      <p class="mensaje-bienvenida">Selecciona un libro para comenzar a leer.</p>
+    </div>
+  </main>
+
+  <script src="src/js/app.js"></script>
+</body>
+</html>
