@@ -71,12 +71,24 @@ selectCapitulo.addEventListener('change', (e) => {
 // 6. Poblar el selector de Capítulos según el libro elegido
 function poblarCapitulos(libroIndex) {
   selectCapitulo.innerHTML = '<option value="">-- Cap --</option>';
-  const capitulos = datosBiblia[libroIndex].capitulos;
+  
+  // Debug para consola: Verificamos qué datos llegan de ese libro
+  console.log("Datos del libro seleccionado:", datosBiblia[libroIndex]);
+
+  const libroSeleccionado = datosBiblia[libroIndex];
+  
+  // Validamos si la propiedad existe tal cual está escrita en el JSON
+  if (!libroSeleccionado || !libroSeleccionado.capitulos) {
+    console.error("Error: No se encontró la propiedad 'capitulos' en el JSON. Revisa mayúsculas/minúsculas o tildes.");
+    return;
+  }
+
+  const capitulos = libroSeleccionado.capitulos;
 
   capitulos.forEach((cap, index) => {
     const option = document.createElement('option');
     option.value = index; // Guardamos el índice del capítulo
-    option.textContent = cap.capitulo;
+    option.textContent = cap.capitulo; // Asegúrate que en el JSON diga "capitulo"
     selectCapitulo.appendChild(option);
   });
   
@@ -105,4 +117,30 @@ function mostrarVersiculos(libroIndex, capituloIndex) {
 function resetearInterfaz() {
   selectCapitulo.innerHTML = '<option value="">-- Cap --</option>';
   visorVersiculos.innerHTML = '<p class="mensaje-bienvenida">Selecciona un libro para comenzar a leer.</p>';
+}
+// 9. Lógica de Accesibilidad: Control del Tamaño de Letra
+let tamañoFuenteActual = 1.3; // Valor inicial en rem (coincide con el CSS)
+const btnAumentar = document.getElementById('btn-aumentar');
+const btnDisminuir = document.getElementById('btn-disminuir');
+
+btnAumentar.addEventListener('click', () => {
+  if (tamañoFuenteActual < 2.2) { // Límite máximo para que no se deforme
+    tamañoFuenteActual += 0.1;
+    aplicarTamañoFuente();
+  }
+});
+
+btnDisminuir.addEventListener('click', () => {
+  if (tamañoFuenteActual > 1.0) { // Límite mínimo legible
+    tamañoFuenteActual -= 0.1;
+    aplicarTamañoFuente();
+  }
+});
+
+function aplicarTamañoFuente() {
+  // Aplicamos el tamaño directamente a los párrafos del visor
+  const parrafos = visorVersiculos.querySelectorAll('p');
+  parrafos.forEach(p => {
+    p.style.fontSize = `${tamañoFuenteActual}rem`;
+  });
 }
