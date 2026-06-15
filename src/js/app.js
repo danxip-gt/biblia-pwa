@@ -1,5 +1,5 @@
 // Variables globales del estado de la aplicación
-let datosBiblia = [];
+let datosBiblia = {}; // AHORA ES UN OBJETO {}
 
 // Elementos del DOM
 const selectLibro = document.getElementById('select-libro');
@@ -39,56 +39,49 @@ async function cargarDatosBiblia() {
 
 // 4. Poblar el selector de Libros dinámicamente
 function poblarLibros() {
-  // Limpiamos e insertamos una opción por defecto
   selectLibro.innerHTML = '<option value="">-- Elige un Libro --</option>';
   selectCapitulo.innerHTML = '<option value="">-- Cap --</option>';
 
-  datosBiblia.forEach((item, index) => {
+  // Extraemos las llaves del objeto (los nombres de los libros)
+  const libros = Object.keys(datosBiblia);
+
+  libros.forEach((nombreLibro) => {
     const option = document.createElement('option');
-    option.value = index; // Guardamos el índice del array para buscar rápido después
-    option.textContent = item.libro;
+    option.value = nombreLibro; // Guardamos directamente el nombre del libro como valor
+    option.textContent = nombreLibro;
     selectLibro.appendChild(option);
   });
 }
+
 // 5. Escuchadores de eventos (Event Listeners) para detectar cambios del usuario
 selectLibro.addEventListener('change', (e) => {
-  const libroIndex = e.target.value;
-  if (libroIndex !== "") {
-    poblarCapitulos(libroIndex);
+  const libroSeleccionado = e.target.value;
+  if (libroSeleccionado !== "") {
+    poblarCapitulos(libroSeleccionado);
   } else {
     resetearInterfaz();
   }
 });
 
 selectCapitulo.addEventListener('change', (e) => {
-  const libroIndex = selectLibro.value;
-  const capituloIndex = e.target.value;
-  if (libroIndex !== "" && capituloIndex !== "") {
-    mostrarVersiculos(libroIndex, capituloIndex);
+  const libroSeleccionado = selectLibro.value;
+  const capituloSeleccionado = e.target.value;
+  if (libroSeleccionado !== "" && capituloSeleccionado !== "") {
+    mostrarVersiculos(libroSeleccionado, capituloSeleccionado);
   }
 });
 
 // 6. Poblar el selector de Capítulos según el libro elegido
-function poblarCapitulos(libroIndex) {
+function poblarCapitulos(libroSeleccionado) {
   selectCapitulo.innerHTML = '<option value="">-- Cap --</option>';
   
-  // Debug para consola: Verificamos qué datos llegan de ese libro
-  console.log("Datos del libro seleccionado:", datosBiblia[libroIndex]);
+  // Obtenemos las llaves de los capítulos (ej: "1", "2", "3")
+  const capitulos = Object.keys(datosBiblia[libroSeleccionado]);
 
-  const libroSeleccionado = datosBiblia[libroIndex];
-  
-  // Validamos si la propiedad existe tal cual está escrita en el JSON
-  if (!libroSeleccionado || !libroSeleccionado.capitulos) {
-    console.error("Error: No se encontró la propiedad 'capitulos' en el JSON. Revisa mayúsculas/minúsculas o tildes.");
-    return;
-  }
-
-  const capitulos = libroSeleccionado.capitulos;
-
-  capitulos.forEach((cap, index) => {
+  capitulos.forEach((numCapitulo) => {
     const option = document.createElement('option');
-    option.value = index; // Guardamos el índice del capítulo
-    option.textContent = cap.capitulo; // Asegúrate que en el JSON diga "capitulo"
+    option.value = numCapitulo; // Guardamos el número como string
+    option.textContent = numCapitulo;
     selectCapitulo.appendChild(option);
   });
   
@@ -96,20 +89,25 @@ function poblarCapitulos(libroIndex) {
 }
 
 // 7. Renderizar los versículos en la interfaz
-function mostrarVersiculos(libroIndex, capituloIndex) {
-  // Limpiamos el visor
+function mostrarVersiculos(libroSeleccionado, capituloSeleccionado) {
   visorVersiculos.innerHTML = '';
   
-  const versiculos = datosBiblia[libroIndex].capitulos[capituloIndex].versiculos;
+  // Obtenemos el objeto del capítulo seleccionado (ej: {"1": "Texto...", "2": "Texto..."})
+  const capituloObjeto = datosBiblia[libroSeleccionado][capituloSeleccionado];
+  const numerosVersiculos = Object.keys(capituloObjeto);
 
-  // Recorremos los versículos y los inyectamos con su formato accesible
-  versiculos.forEach((v) => {
+  // Recorremos las llaves de los versículos e inyectamos el contenido
+  numerosVersiculos.forEach((numVersiculo) => {
+    const textoVersiculo = capituloObjeto[numVersiculo];
+    
     const parrafo = document.createElement('p');
-    parrafo.innerHTML = `<span class="num-versiculo">${v.numero}</span>${v.texto}`;
+    parrafo.innerHTML = `<span class="num-versiculo">${numVersiculo}</span>${textoVersiculo}`;
     visorVersiculos.appendChild(parrafo);
   });
 
-  // Scroll automático hacia arriba para que empiece a leer cómodamente
+  // Forzar que mantenga el tamaño de fuente elegido por tu abuela al cambiar de capítulo
+  aplicarTamañoFuente();
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -118,27 +116,27 @@ function resetearInterfaz() {
   selectCapitulo.innerHTML = '<option value="">-- Cap --</option>';
   visorVersiculos.innerHTML = '<p class="mensaje-bienvenida">Selecciona un libro para comenzar a leer.</p>';
 }
+
 // 9. Lógica de Accesibilidad: Control del Tamaño de Letra
-let tamañoFuenteActual = 1.3; // Valor inicial en rem (coincide con el CSS)
+let tamañoFuenteActual = 1.3; 
 const btnAumentar = document.getElementById('btn-aumentar');
 const btnDisminuir = document.getElementById('btn-disminuir');
 
 btnAumentar.addEventListener('click', () => {
-  if (tamañoFuenteActual < 2.2) { // Límite máximo para que no se deforme
+  if (tamañoFuenteActual < 2.2) { 
     tamañoFuenteActual += 0.1;
     aplicarTamañoFuente();
   }
 });
 
 btnDisminuir.addEventListener('click', () => {
-  if (tamañoFuenteActual > 1.0) { // Límite mínimo legible
+  if (tamañoFuenteActual > 1.0) { 
     tamañoFuenteActual -= 0.1;
     aplicarTamañoFuente();
   }
 });
 
 function aplicarTamañoFuente() {
-  // Aplicamos el tamaño directamente a los párrafos del visor
   const parrafos = visorVersiculos.querySelectorAll('p');
   parrafos.forEach(p => {
     p.style.fontSize = `${tamañoFuenteActual}rem`;
